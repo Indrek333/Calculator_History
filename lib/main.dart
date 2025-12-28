@@ -13,7 +13,7 @@ class CalculatorApp extends StatelessWidget {
     final seed = const Color(0xFF2A5298);
 
     return MaterialApp(
-      title: 'Kalkulaator MVC',
+      title: 'Kalkulaator',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(

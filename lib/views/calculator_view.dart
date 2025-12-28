@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'converter_view.dart';
+import 'history_view.dart';
 import '../models/calculator_model.dart';
 import '../controllers/calculator_controller.dart';
-
 
 class CalculatorView extends StatefulWidget {
   const CalculatorView({super.key});
@@ -25,15 +25,14 @@ class _CalculatorViewState extends State<CalculatorView> {
     _controller = CalculatorController(_model);
   }
 
-  void _onOperationPressed(Operation operation) {
-    
+  
+  Future<void> _onOperationPressed(Operation operation) async {
     _controller.updateFirstNumber(_firstController.text);
     _controller.updateSecondNumber(_secondController.text);
 
   
-    _controller.calculate(operation);
+    await _controller.calculate(operation);
 
-    
     setState(() {});
   }
 
@@ -42,6 +41,23 @@ class _CalculatorViewState extends State<CalculatorView> {
     final theme = Theme.of(context);
 
     return Scaffold(
+      
+      appBar: AppBar(
+        title: const Text('Lihtne kalkulaator'),
+        actions: [
+          IconButton(
+            tooltip: 'Ajalugu',
+            icon: const Icon(Icons.history),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const HistoryView()),
+              );
+            },
+          ),
+        ],
+      ),
+
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -70,7 +86,6 @@ class _CalculatorViewState extends State<CalculatorView> {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        // Pealkiri
                         Text(
                           'Lihtne kalkulaator',
                           textAlign: TextAlign.center,
@@ -78,7 +93,7 @@ class _CalculatorViewState extends State<CalculatorView> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                                               
+
                         ElevatedButton.icon(
                           onPressed: () {
                             Navigator.push(
@@ -93,11 +108,6 @@ class _CalculatorViewState extends State<CalculatorView> {
                         ),
                         const SizedBox(height: 16),
 
-
-                        // Esimene arv 
-
-                        
-                       
                         const SizedBox(height: 6),
                         TextField(
                           controller: _firstController,
@@ -115,8 +125,6 @@ class _CalculatorViewState extends State<CalculatorView> {
 
                         const SizedBox(height: 16),
 
-                        // Teine arv
-                        
                         const SizedBox(height: 6),
                         TextField(
                           controller: _secondController,
@@ -134,7 +142,6 @@ class _CalculatorViewState extends State<CalculatorView> {
 
                         const SizedBox(height: 20),
 
-                        // Tehte valik
                         Text(
                           'Vali tehe',
                           style: theme.textTheme.labelLarge,
@@ -149,13 +156,11 @@ class _CalculatorViewState extends State<CalculatorView> {
                             ),
                             _OperationButton(
                               label: '−',
-                              onTap: () =>
-                                  _onOperationPressed(Operation.subtract),
+                              onTap: () => _onOperationPressed(Operation.subtract),
                             ),
                             _OperationButton(
                               label: '×',
-                              onTap: () =>
-                                  _onOperationPressed(Operation.multiply),
+                              onTap: () => _onOperationPressed(Operation.multiply),
                             ),
                             _OperationButton(
                               label: '÷',
@@ -166,7 +171,6 @@ class _CalculatorViewState extends State<CalculatorView> {
 
                         const SizedBox(height: 24),
 
-                        // Tulemus – SAMA ekraani alumises osas
                         Text(
                           'Tulemus',
                           style: theme.textTheme.labelLarge,
@@ -187,8 +191,6 @@ class _CalculatorViewState extends State<CalculatorView> {
                             ),
                           ),
                         ),
-
-                                               
                       ],
                     ),
                   ),
