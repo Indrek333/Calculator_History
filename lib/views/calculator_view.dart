@@ -15,8 +15,7 @@ class _CalculatorViewState extends State<CalculatorView> {
   late final CalculatorModel _model;
   late final CalculatorController _controller;
 
-  final TextEditingController _firstController = TextEditingController();
-  final TextEditingController _secondController = TextEditingController();
+  final TextEditingController _expressionController = TextEditingController();
 
   @override
   void initState() {
@@ -25,14 +24,31 @@ class _CalculatorViewState extends State<CalculatorView> {
     _controller = CalculatorController(_model);
   }
 
-  
-  Future<void> _onOperationPressed(Operation operation) async {
-    _controller.updateFirstNumber(_firstController.text);
-    _controller.updateSecondNumber(_secondController.text);
+  @override
+  void dispose() {
+    _expressionController.dispose();
+    super.dispose();
+  }
+
+  void _insertText(String text) {
+    final value = _expressionController.value;
+    final selection = value.selection;
+    final baseText = value.text;
+    final insertAt = selection.isValid ? selection.start : baseText.length;
+    final endAt = selection.isValid ? selection.end : baseText.length;
+
+    final newText = baseText.replaceRange(insertAt, endAt, text);
+    final cursorPosition = insertAt + text.length;
+
+    _expressionController.value = value.copyWith(
+      text: newText,
+      selection: TextSelection.collapsed(offset: cursorPosition),
+    );
+  }
 
   
-    await _controller.calculate(operation);
-
+  Future<void> _onCalculatePressed() async {
+    await _controller.calculateExpression(_expressionController.text);
     setState(() {});
   }
 
@@ -58,34 +74,34 @@ class _CalculatorViewState extends State<CalculatorView> {
         ],
       ),
 
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Color(0xFF1E3C72),
-              Color(0xFF2A5298),
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        child: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 420),
-                child: Card(
-                  elevation: 10,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
+  body: Container(
+    decoration: const BoxDecoration(
+      gradient: LinearGradient(
+        colors: [
+          Color(0xFF1E3C72),
+          Color(0xFF2A5298),
+        ],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ),
+    ),
+    child: SafeArea(
+      child: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 420),
+            child: Card(
+              elevation: 10,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(24),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                        children: [
                         Text(
                           'Lihtne kalkulaator',
                           textAlign: TextAlign.center,
@@ -110,30 +126,11 @@ class _CalculatorViewState extends State<CalculatorView> {
 
                         const SizedBox(height: 6),
                         TextField(
-                          controller: _firstController,
-                          keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true,
-                          ),
+                          controller: _expressionController,
+                          keyboardType: TextInputType.text,
                           decoration: InputDecoration(
-                            prefixIcon: const Icon(Icons.filter_1),
-                            hintText: 'Sisesta esimene reaalarv',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                          ),
-                        ),
-
-                        const SizedBox(height: 16),
-
-                        const SizedBox(height: 6),
-                        TextField(
-                          controller: _secondController,
-                          keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true,
-                          ),
-                          decoration: InputDecoration(
-                            prefixIcon: const Icon(Icons.filter_2),
-                            hintText: 'Sisesta teine reaalarv',
+                            prefixIcon: const Icon(Icons.edit),
+                            hintText: 'Sisesta võrrand (nt 5+6/2)',
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(16),
                             ),
@@ -142,31 +139,50 @@ class _CalculatorViewState extends State<CalculatorView> {
 
                         const SizedBox(height: 20),
 
-                        Text(
-                          'Vali tehe',
-                          style: theme.textTheme.labelLarge,
-                        ),
-                        const SizedBox(height: 10),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        Column(
                           children: [
-                            _OperationButton(
-                              label: '+',
-                              onTap: () => _onOperationPressed(Operation.add),
+                            Row(
+                              children: [
+                                _KeyButton(label: '7', onTap: () => _insertText('7')),
+                                _KeyButton(label: '8', onTap: () => _insertText('8')),
+                                _KeyButton(label: '9', onTap: () => _insertText('9')),
+                                _KeyButton(label: '÷', onTap: () => _insertText('/')),
+                              ],
                             ),
-                            _OperationButton(
-                              label: '−',
-                              onTap: () => _onOperationPressed(Operation.subtract),
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                _KeyButton(label: '4', onTap: () => _insertText('4')),
+                                _KeyButton(label: '5', onTap: () => _insertText('5')),
+                                _KeyButton(label: '6', onTap: () => _insertText('6')),
+                                _KeyButton(label: '×', onTap: () => _insertText('*')),
+                              ],
                             ),
-                            _OperationButton(
-                              label: '×',
-                              onTap: () => _onOperationPressed(Operation.multiply),
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                _KeyButton(label: '1', onTap: () => _insertText('1')),
+                                _KeyButton(label: '2', onTap: () => _insertText('2')),
+                                _KeyButton(label: '3', onTap: () => _insertText('3')),
+                                _KeyButton(label: '−', onTap: () => _insertText('-')),
+                              ],
                             ),
-                            _OperationButton(
-                              label: '÷',
-                              onTap: () => _onOperationPressed(Operation.divide),
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                _KeyButton(label: '0', onTap: () => _insertText('0')),
+                                _KeyButton(label: '+', onTap: () => _insertText('+')),
+                              ],
                             ),
                           ],
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        ElevatedButton.icon(
+                          onPressed: _onCalculatePressed,
+                          icon: const Icon(Icons.check),
+                          label: const Text('Arvuta'),
                         ),
 
                         const SizedBox(height: 24),
@@ -204,19 +220,14 @@ class _CalculatorViewState extends State<CalculatorView> {
   }
 }
 
-class _OperationButton extends StatelessWidget {
+class _KeyButton extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
 
-  const _OperationButton({
-    required this.label,
-    required this.onTap,
-  });
+  const _KeyButton({required this.label, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Expanded(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -227,13 +238,12 @@ class _OperationButton extends StatelessWidget {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
-            elevation: 3,
           ),
           child: Text(
             label,
-            style: theme.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
           ),
         ),
       ),

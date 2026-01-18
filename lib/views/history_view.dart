@@ -21,6 +21,7 @@ class _HistoryViewState extends State<HistoryView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey.shade100,
       appBar: AppBar(
         title: const Text('Ajalugu'),
         actions: [
@@ -43,19 +44,30 @@ class _HistoryViewState extends State<HistoryView> {
           final items = snapshot.data ?? [];
 
           if (items.isEmpty) {
-            return const Center(child: Text('Ajalugu on tühi.'));
+            return const Center(
+              child: Text(
+                'Ajalugu on tühi.',
+                style: TextStyle(color: Colors.black),
+              ),
+            );
           }
 
           return ListView.separated(
             padding: const EdgeInsets.all(12),
             itemCount: items.length,
-            separatorBuilder: (_, __) => const Divider(height: 12),
+            separatorBuilder: (_, __) => const Divider(height: 12, color: Colors.black12),
             itemBuilder: (context, index) {
               final item = items[index];
               return ListTile(
-                leading: const Icon(Icons.history),
-                title: Text(item.expression),
-                subtitle: Text(item.timestamp),
+                leading: const Icon(Icons.history, color: Colors.black),
+                title: Text(
+                  item.expression,
+                  style: const TextStyle(color: Colors.black),
+                ),
+                subtitle: Text(
+                  item.timestamp,
+                  style: const TextStyle(color: Colors.black54),
+                ),
               );
             },
           );
